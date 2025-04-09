@@ -16,5 +16,5 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True,onupdate=datetime.utcnow)
 
-    accounts = relationship("BankAccount", back_populates="user", cascade="all, delete, delete-orphan")
+    bank_accounts = relationship("BankAccount", back_populates="owner", cascade="all, delete, delete-orphan")
     transactions = relationship("BankTransaction", back_populates="user", cascade="all, delete, delete-orphan")

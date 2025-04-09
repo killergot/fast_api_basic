@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+from uuid import UUID
+
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends,HTTPException, status
 
@@ -19,9 +21,9 @@ header = {'alg': ALGORITHM, 'typ': 'JWT'}
 
 security = HTTPBearer()
 
-def get_jwt(sub: str):
+def get_jwt(id: UUID, sub: str):
     expire_at = time.time() + ACCESS_TOKEN_EXPIRE_SECONDS
-    payload = { 'email': sub, 'exp': expire_at}
+    payload = {'id' : str(id), 'email': sub, 'exp': expire_at}
     token = jwt.encode(header, payload, key).decode('utf-8')
     return {'access_token': token, 'expires_at': datetime.fromtimestamp(expire_at,
                                                                 tz=timezone.utc)}

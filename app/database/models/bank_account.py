@@ -7,9 +7,9 @@ from sqlalchemy.dialects.postgresql import UUID
 class BankAccount(Base):
     __tablename__ = 'bank_account'
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     balance = Column(Integer, nullable=False)
 
-    user = relationship('User', back_populates='accounts')
-    transactions = relationship('Transaction', back_populates='bankAccount')
+    owner = relationship('User', back_populates='bank_accounts')
+    transactions = relationship('BankTransaction', back_populates='bank_accounts')

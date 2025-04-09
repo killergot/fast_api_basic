@@ -8,19 +8,19 @@ from hashlib import sha256
 
 
 
-class UserService:
-    @classmethod
-    def get_user_if_user_exist(cls,db: Session, email):
+class UserCRUD:
+    @staticmethod
+    def get_user_if_user_exist(db: Session, email):
         return db.query(User).filter(User.email == email).first()
 
-    @classmethod
-    def encode_password(cls,password):
+    @staticmethod
+    def encode_password(password):
         return sha256(password.encode()).hexdigest()
 
     @classmethod
     def create_user(cls,db: Session, user: UserIn):
         if cls.get_user_if_user_exist(db, user.email):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail='Email already registered')
         # Тут возможно стоит поменять на то, что не стоит выдавать инфу о существующих пользователях
         # Точнее вообще никакой инфы, всегда отвечать ok True, чтоб нельзя было перебрать базу пользователей
@@ -44,5 +44,5 @@ class UserService:
         user =cls.get_user_if_user_exist(db, email)
         if not user or user.password != cls.encode_password(password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="email or password incorrect")
-        token = get_jwt(email)
+        token = get_jwt(user.id, email)
         return UserSessionOut.model_validate(token)
