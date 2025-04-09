@@ -1,14 +1,18 @@
-from fastapi import HTTPException, status
+from fastapi import Depends,HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app.database.models.auth import User
-from app.services.jwt import  get_jwt
+from app.services.jwt import get_jwt, verify_jwt
 from app.shemas.auth import UserIn, UserOut, UserSessionOut
 from hashlib import sha256
 
 
 
 class UserCRUD:
+    security = HTTPBearer()
     @staticmethod
     def get_user_if_user_exist(db: Session, email):
         return db.query(User).filter(User.email == email).first()
@@ -46,3 +50,29 @@ class UserCRUD:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="email or password incorrect")
         token = get_jwt(user.id, email)
         return UserSessionOut.model_validate(token)
+
+    @classmethod
+    def get_current_user(cls,credentials: HTTPAuthorizationCredentials = Depends(security),
+                         db: Session = Depends(get_db)):
+        if not credentials or not credentials.scheme.lower() == "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authorization scheme"
+            )
+
+        token = credentials.credentials
+        claims = verify_jwt(token)
+        if not claims:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+
+        if cls.get_user_if_user_exist(db, claims['email']):
+            return claims
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="email not registered"
+        )
+
+

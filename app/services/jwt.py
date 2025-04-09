@@ -1,9 +1,6 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends,HTTPException, status
-
 from authlib.jose import jwt
 import time
 
@@ -19,7 +16,7 @@ ACCESS_TOKEN_EXPIRE_SECONDS = 3600  # час
 key = {'k': SECRET_KEY, 'kty': 'oct'}
 header = {'alg': ALGORITHM, 'typ': 'JWT'}
 
-security = HTTPBearer()
+
 
 def get_jwt(id: UUID, sub: str):
     expire_at = time.time() + ACCESS_TOKEN_EXPIRE_SECONDS
@@ -36,18 +33,3 @@ def verify_jwt(token):
     except:
         return False
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if not credentials or not credentials.scheme.lower() == "bearer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization scheme"
-        )
-
-    token = credentials.credentials
-    claims = verify_jwt(token)
-    if not claims:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token"
-        )
-    return claims
