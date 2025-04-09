@@ -3,3 +3,4 @@ venv/
 .idea/
 .venv
 tests/test.py
+app/.env
