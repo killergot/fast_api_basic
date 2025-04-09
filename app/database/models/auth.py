@@ -1,0 +1,21 @@
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Text, TIMESTAMP, DateTime
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from app.database.psql import Base, engine
+import uuid
+from datetime import datetime
+
+# Модель пользователей (users)
+class User(Base):
+    __tablename__ = 'users'
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True,onupdate=datetime.utcnow)
+
+
+# Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
