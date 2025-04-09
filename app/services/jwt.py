@@ -21,7 +21,7 @@ security = HTTPBearer()
 
 def get_jwt(sub: str):
     expire_at = time.time() + ACCESS_TOKEN_EXPIRE_SECONDS
-    payload = { 'sub': sub, 'exp': expire_at}
+    payload = { 'email': sub, 'exp': expire_at}
     token = jwt.encode(header, payload, key).decode('utf-8')
     return {'access_token': token, 'expires_at': datetime.fromtimestamp(expire_at,
                                                                 tz=timezone.utc)}

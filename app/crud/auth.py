@@ -20,7 +20,8 @@ class UserService:
     @classmethod
     def create_user(cls,db: Session, user: UserIn):
         if cls.get_user_if_user_exist(db, user.email):
-            raise {"ok": True}
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail='Email already registered')
         # Тут возможно стоит поменять на то, что не стоит выдавать инфу о существующих пользователях
         # Точнее вообще никакой инфы, всегда отвечать ok True, чтоб нельзя было перебрать базу пользователей
 

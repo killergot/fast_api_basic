@@ -1,9 +1,9 @@
-from fastapi import Depends, status
+from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.database.psql import get_db
+from app.database import get_db
 from app.services.jwt import get_current_user
 from app.shemas.auth import UserOut, UserIn, UserLogin, UserSessionOut
 from app.crud.auth import UserService
@@ -19,10 +19,11 @@ async def create_user(user: UserIn, db: Session = Depends(get_db)):
 async def login(user: UserLogin, db: Session = Depends(get_db)):
     return UserService.login_user(db, user.email, user.password)
 
-@router.get("/protected", dependencies=[Depends(get_current_user)])
-def protected_route(user = Depends(get_current_user)):
-    return {"message": f"Hello, user {user}!"}
+@router.get("/get_me", response_model=UserOut, status_code=status.HTTP_200_OK,
+            dependencies=[Depends(get_current_user)])
+def protected_route(user = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = UserService.get_user_if_user_exist(db, user['email'])
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_UNAUTHORIZED)
+    return UserOut.model_validate(user)
 
-@router.get("/get_me", dependencies=[Depends(get_current_user)])
-def protected_route(user = Depends(get_current_user)):
-    return {"message": f"Hello, user {user}!"}
