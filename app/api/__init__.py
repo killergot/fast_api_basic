@@ -1,5 +1,5 @@
 from .auth import router as auth_router
-from .account import router as account_router
+from .bank_account import router as account_router
 from .transaction import router as transaction_router
 from fastapi.routing import APIRouter
 

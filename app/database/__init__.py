@@ -4,6 +4,6 @@ from .models.transaction import BankTransaction
 from .models.bank_account import BankAccount
 
 
-create_db()
+# create_db()
 
 

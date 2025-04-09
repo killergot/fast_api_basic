@@ -1,10 +1,8 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel,ConfigDict
 
 class BankAccountOut(BaseModel):
     id: int
-    owner_id: int
+    user_id: int
     balance: int
 
-
-
-
+    model_config = ConfigDict(from_attributes=True)

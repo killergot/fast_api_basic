@@ -7,11 +7,11 @@ from sqlalchemy.dialects.postgresql import UUID
 class BankTransaction(Base):
     __tablename__ = 'bank_transaction'
 
-    transaction_id: int = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    account_id = Column(Integer, ForeignKey('bank_account.id'), nullable=False)
-    amount = Column(Integer, nullable=False)
-    signature = Column(Text, nullable=False)
+    transaction_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    user_id: Mapped[Integer] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    account_id: Mapped[Integer] = mapped_column(Integer, ForeignKey('bank_account.id'), nullable=False)
+    amount: Mapped[Integer] = mapped_column(Integer, nullable=False)
+    signature: Mapped[str] = mapped_column(Text, nullable=False)
 
     bank_accounts = relationship('BankAccount',
                                 back_populates='transactions')

@@ -18,9 +18,9 @@ header = {'alg': ALGORITHM, 'typ': 'JWT'}
 
 
 
-def get_jwt(id: UUID, sub: str):
+def get_jwt(user_id: int, sub: str):
     expire_at = time.time() + ACCESS_TOKEN_EXPIRE_SECONDS
-    payload = {'id' : str(id), 'email': sub, 'exp': expire_at}
+    payload = {'id' : int(user_id), 'email': sub, 'exp': expire_at}
     token = jwt.encode(header, payload, key).decode('utf-8')
     return {'access_token': token, 'expires_at': datetime.fromtimestamp(expire_at,
                                                                 tz=timezone.utc)}
