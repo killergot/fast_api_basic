@@ -46,7 +46,12 @@ async def get_all_transactions(db: AsyncSession = Depends(get_db),
 async def get_transaction(transaction_id: UUID,
                           db: AsyncSession = Depends(get_db),
                           user = Depends(UserCRUD.get_current)):
-    return await TransactionCRUD.get_if_exist(db, transaction_id, user['id'])
+    temp = await TransactionCRUD.get_if_exist(db, transaction_id, user['id'])
+    if temp is None or temp.user_id != user['id']:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Transaction not found")
+    else:
+        return TransactionOut.model_validate(temp)
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_200_OK,
                dependencies=[Depends(UserCRUD.get_current)])

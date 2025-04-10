@@ -20,11 +20,8 @@ SECRET_KEY = load_config().secret_keys.secret_key_signature
 class TransactionCRUD:
     @staticmethod
     async def get_if_exist( db: AsyncSession, transaction_id: UUID, user_id: int):
-        temp = await db.get(BankTransaction, transaction_id)
-        if temp and temp.user_id == user_id:
-            return temp
-        else:
-            return None
+        return await db.get(BankTransaction, transaction_id)
+
 
     @staticmethod
     def get_signature(*args):
@@ -52,7 +49,7 @@ class TransactionCRUD:
                 str(transaction_id),
                 str(user_id)
             )
-        if signature is not None and sign != signature:
+        if signature is not None and sign != signature or signature in None and user_id is not None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='Signature does not valide')
 
