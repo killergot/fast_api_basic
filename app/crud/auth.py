@@ -1,7 +1,8 @@
 from fastapi import Depends,HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.database.models.auth import User
@@ -12,12 +13,14 @@ from app.shemas.auth import UserIn, UserOut, UserSessionOut
 class UserCRUD:
     security = HTTPBearer()
     @staticmethod
-    def get_if_exist(db: Session, email):
-        return db.query(User).filter(User.email == email).first()
+    async def get_if_exist(db: AsyncSession, email):
+        stmt = select(User).filter(User.email == email)
+        result = await db.execute(stmt)
+        return result.scalars().first()
 
     @classmethod
-    def create(cls, db: Session, user: UserIn):
-        if cls.get_if_exist(db, user.email):
+    async def create(cls, db: AsyncSession, user: UserIn):
+        if await cls.get_if_exist(db, user.email):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail='Email already registered')
         # Тут возможно стоит поменять на то, что не стоит выдавать инфу о существующих пользователях
@@ -29,8 +32,8 @@ class UserCRUD:
             password=encode_data(user.password)
         )
         db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        await db.commit()
+        await db.refresh(db_user)
 
         return UserOut.model_validate(db_user)
 
@@ -38,8 +41,8 @@ class UserCRUD:
     # В данном случае для ТЗ достаточно просто выдавать jwt
     # Нет необходимости сохранять сессии
     @classmethod
-    def login(cls, db: Session, email: str, password: str):
-        user =cls.get_if_exist(db, email)
+    async def login(cls, db: AsyncSession, email: str, password: str):
+        user = await cls.get_if_exist(db, email)
         if not user or user.password != encode_data(password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="email or password incorrect")
         token = get_jwt(user.id, email)
@@ -47,7 +50,7 @@ class UserCRUD:
 
     @classmethod
     def get_current(cls, credentials: HTTPAuthorizationCredentials = Depends(security),
-                    db: Session = Depends(get_db)):
+                    db: AsyncSession = Depends(get_db)):
         if not credentials or not credentials.scheme.lower() == "bearer":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
