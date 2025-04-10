@@ -18,10 +18,14 @@ SECRET_KEY = load_config().secret_keys.secret_key_signature
 
 class TransactionCRUD:
     @staticmethod
-    def get_if_exist(transaction_id: UUID, db: Session):
-        return (db.query(BankTransaction).
+    def get_if_exist(transaction_id: UUID,user_id: int, db: Session):
+        temp =  (db.query(BankTransaction).
                 filter(BankTransaction.transaction_id == transaction_id)
                 .first())
+        if temp and temp.user_id == user_id:
+            return temp
+        else:
+            return None
 
     @staticmethod
     def get_signature(*args):
@@ -64,5 +68,11 @@ class TransactionCRUD:
         db.commit()
         db.refresh(transaction_db)
         return TransactionOut.model_validate(transaction_db)
+
+    @staticmethod
+    def get_all(db: Session, user_id: int):
+        res = db.query(BankTransaction).filter(BankTransaction.user_id==user_id).all()
+        result = [{"id": t.transaction_id, "amount": t.amount, "account": t.account_id} for t in res]
+        return result
 
 

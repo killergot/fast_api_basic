@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
@@ -11,9 +13,13 @@ router = APIRouter(prefix="/transaction", tags=["transaction"])
 
 @router.post("/me", status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(UserCRUD.get_current)])
-async def do_transaction(db: Session = Depends(get_db),
+async def do_transaction(transaction: TransactionIn,
+                         db: Session = Depends(get_db),
                          user = Depends(UserCRUD.get_current)):
-    pass
+    return TransactionCRUD.create(db,
+                                  user['id'],
+                                  transaction.account_id,
+                                  transaction.amount)
 
 @router.post("/other", status_code=status.HTTP_201_CREATED,
              response_model=TransactionOut)
@@ -30,21 +36,23 @@ async def do_transaction(transaction: TransactionOtherIn,
             dependencies=[Depends(UserCRUD.get_current)])
 async def get_all_transactions(db: Session = Depends(get_db),
                                user = Depends(UserCRUD.get_current)):
-    pass
+    return TransactionCRUD.get_all(db,user['id'])
 
-@router.get("/{account_id}", status_code=status.HTTP_200_OK,
+@router.get("/{transaction_id}", status_code=status.HTTP_200_OK,
             dependencies=[Depends(UserCRUD.get_current)])
-async def get_transaction(account_id: int,
+async def get_transaction(transaction_id: UUID,
                           db: Session = Depends(get_db),
                           user = Depends(UserCRUD.get_current)):
-    pass
+    return TransactionCRUD.get_if_exist(transaction_id, user['id'],db)
 
-@router.delete("/{account_id}", status_code=status.HTTP_200_OK,
+@router.delete("/{transaction_id}", status_code=status.HTTP_200_OK,
                dependencies=[Depends(UserCRUD.get_current)])
-async def try_delete_transaction(account_id: int,
-                                 db: Session = Depends(get_db),
+async def try_delete_transaction(transaction_id: UUID,
                                  user = Depends(UserCRUD.get_current)):
-    return {'msg': 'You can not delete your bank transaction:)'}
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Deleting transactions is not allowed by system policy"
+    )
 
 
 
