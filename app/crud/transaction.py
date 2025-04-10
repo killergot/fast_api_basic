@@ -18,7 +18,7 @@ SECRET_KEY = load_config().secret_keys.secret_key_signature
 
 class TransactionCRUD:
     @staticmethod
-    def get_if_exist(transaction_id: UUID,user_id: int, db: Session):
+    def get_if_exist( db: Session, transaction_id: UUID, user_id: int):
         temp =  (db.query(BankTransaction).
                 filter(BankTransaction.transaction_id == transaction_id)
                 .first())
@@ -43,7 +43,7 @@ class TransactionCRUD:
         if account_db is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='Account not found')
-        if transaction_id is not None and cls.get_if_exist(transaction_id, db):
+        if transaction_id is not None and cls.get_if_exist(db,transaction_id, user_id):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='Transaction already exists')
 

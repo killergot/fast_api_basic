@@ -25,6 +25,9 @@ async def do_transaction(transaction: TransactionIn,
              response_model=TransactionOut)
 async def do_transaction(transaction: TransactionOtherIn,
                          db: Session = Depends(get_db)):
+    '''В общем я не знаю как надо было сделать уникальные транзакции:
+    Для каждого или для всех. Я сделал так, что для одного пользователя
+    uuid транзакции повторяться не может'''
     return TransactionCRUD.create(db,
                                   transaction.user_id,
                                   transaction.account_id,
@@ -43,12 +46,11 @@ async def get_all_transactions(db: Session = Depends(get_db),
 async def get_transaction(transaction_id: UUID,
                           db: Session = Depends(get_db),
                           user = Depends(UserCRUD.get_current)):
-    return TransactionCRUD.get_if_exist(transaction_id, user['id'],db)
+    return TransactionCRUD.get_if_exist(db, transaction_id, user['id'])
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_200_OK,
                dependencies=[Depends(UserCRUD.get_current)])
-async def try_delete_transaction(transaction_id: UUID,
-                                 user = Depends(UserCRUD.get_current)):
+async def try_delete_transaction(transaction_id: UUID):
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Deleting transactions is not allowed by system policy"
