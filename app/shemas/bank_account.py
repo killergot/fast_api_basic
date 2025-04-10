@@ -1,7 +1,9 @@
 from pydantic import BaseModel,ConfigDict
 
-class BankAccountOut(BaseModel):
+class BankAccountIn(BaseModel):
     id: int
+
+class BankAccountOut(BankAccountIn):
     user_id: int
     balance: int
 

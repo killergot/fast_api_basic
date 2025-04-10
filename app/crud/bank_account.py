@@ -1,4 +1,4 @@
-from typing import Optional, List, Type
+from typing import Optional
 
 
 from sqlalchemy import select
@@ -13,19 +13,15 @@ from app.shemas.bank_account import BankAccountOut
 class AccountCRUD:
     @staticmethod
     async def get_if_exist(db: AsyncSession, account_id: int, user_id: int) -> Optional[BankAccount]:
-        account_db: BankAccount = await db.get(BankAccount, account_id)
+        account_db: BankAccount = await db.get(BankAccount, (account_id, user_id))
         if account_db is None:
-            return None
-        # Это нужно делать как-то более умно
-        # Равенство не срабатывало без str из-за разности типов
-        if str(user_id) != str(account_db.user_id):
             return None
         return account_db
 
     @classmethod
-    async def create(cls, db: AsyncSession, user: int) -> BankAccountOut:
+    async def create(cls, db: AsyncSession,account_id : int, user: int) -> BankAccountOut:
         try:
-            db_account = BankAccount(user_id=user)
+            db_account = BankAccount(id = account_id, user_id=user)
             db.add(db_account)
             await db.commit()
             await db.refresh(db_account)
@@ -43,7 +39,7 @@ class AccountCRUD:
         return result.scalars().all()
 
     @classmethod
-    async def get_one(cls, db: AsyncSession, account_id: int, user_id: int) -> Optional[BankAccountOut]:
+    async def get_one(cls, db: AsyncSession, account_id: int, user_id: int) -> BankAccountOut:
         db_account = await cls.get_if_exist(db, account_id,user_id)
         if not db_account:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

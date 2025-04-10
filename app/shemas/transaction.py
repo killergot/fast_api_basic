@@ -10,7 +10,14 @@ class TransactionIn(BaseModel):
     @staticmethod
     def GT0(value):
         if value <= 0:
-           raise Exception('value must be greater than 0')
+           raise Exception('amount must be greater than 0')
+        return value
+
+    @field_validator('account_id')
+    @staticmethod
+    def GT0(value):
+        if value <= 0:
+            raise Exception('account_id must be greater than 0')
         return value
 
 

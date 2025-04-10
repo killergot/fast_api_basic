@@ -29,36 +29,52 @@ class TransactionCRUD:
         return encode_data(data)
 
     @classmethod
+    async def create_from(cls,db: AsyncSession,
+                  user_id: int,
+                  account_id: int,
+                  amount: int,
+                  transaction_id,
+                  signature):
+
+        sign_try = cls.get_signature(
+            account_id,
+            amount,
+            transaction_id,
+            user_id
+        )
+
+        if signature is None or sign_try != signature:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail='Signature does not valide')
+        return await cls.create(db, user_id, account_id, amount,transaction_id, sign_try)
+
+    @classmethod
     async def create(cls,db: AsyncSession,
                   user_id: int,
                   account_id: int,
                   amount: int,
                   transaction_id: Optional[UUID] = None,
-                  signature: Optional[str] = None,):
+                  signature: Optional[str] = None):
+        transaction_id = transaction_id or uuid.uuid4()
         account_db = await AccountCRUD.get_if_exist(db, account_id,user_id)
         if account_db is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail='Account not found')
+            # Создаем кошель, если его нема
+            await AccountCRUD.create(
+                db, account_id, user_id
+            )
         if transaction_id is not None and await cls.get_if_exist(db,transaction_id, user_id):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='Transaction already exists')
 
-        sign = cls.get_signature(
-                str(account_id),
-                str(amount),
-                str(transaction_id),
-                str(user_id)
-            )
-        if signature is not None and sign != signature or signature in None and user_id is not None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail='Signature does not valide')
-
         transaction_db = BankTransaction(
-            transaction_id=transaction_id if transaction_id is not None else uuid.uuid4(),
+            transaction_id=transaction_id,
             user_id=user_id,
             account_id=account_id,
             amount=amount,
-            signature=sign
+            signature=signature if signature is not None else cls.get_signature(account_id,
+                                                                                amount,
+                                                                                transaction_id,
+                                                                                user_id),
         )
         db.add(transaction_db)
         await db.commit()

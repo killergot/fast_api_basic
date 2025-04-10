@@ -1,14 +1,16 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, ForeignKey, PrimaryKeyConstraint
 from app.database.psql import Base
-from sqlalchemy.dialects.postgresql import UUID
 
 class BankAccount(Base):
     __tablename__ = 'bank_account'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'user_id'),
+    )
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    balance = Column(Integer, nullable=False, default=0)
+    id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    balance: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    owner = relationship('User', back_populates='bank_accounts')
-    transactions = relationship('BankTransaction', back_populates='bank_accounts')
+    owner: Mapped["User"] = relationship('User', back_populates='bank_accounts')
+    transactions: Mapped[list["BankTransaction"]] = relationship('BankTransaction', back_populates='bank_accounts')

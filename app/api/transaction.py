@@ -26,9 +26,9 @@ async def do_transaction(transaction: TransactionIn,
 async def do_transaction(transaction: TransactionOtherIn,
                          db: AsyncSession = Depends(get_db)):
     '''В общем я не знаю как надо было сделать уникальные транзакции:
-    Для каждого или для всех. Я сделал так, что для одного пользователя
+    Для каждого или для всех. Я сделал так, что для всех пользователей
     uuid транзакции повторяться не может'''
-    return await TransactionCRUD.create(db,
+    return await TransactionCRUD.create_from(db,
                                   transaction.user_id,
                                   transaction.account_id,
                                   transaction.amount,

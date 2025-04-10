@@ -7,15 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.bank_account import AccountCRUD
 from app.database import get_db
 from app.crud.auth import UserCRUD
-from app.shemas.bank_account import BankAccountOut
+from app.shemas.bank_account import BankAccountOut, BankAccountIn
 
 router = APIRouter(prefix="/account", tags=["account"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(UserCRUD.get_current)])
-async def create_account(db: AsyncSession = Depends(get_db),
+async def create_account(account_id : BankAccountIn,db: AsyncSession = Depends(get_db),
                          user = Depends(UserCRUD.get_current)):
-    return await AccountCRUD.create(db, user['id'])
+    return await AccountCRUD.create(db, account_id.id, user['id'])
 
 
 @router.get("/all", status_code=status.HTTP_200_OK,

@@ -49,7 +49,7 @@ class UserCRUD:
         return UserSessionOut.model_validate(token)
 
     @classmethod
-    def get_current(cls, credentials: HTTPAuthorizationCredentials = Depends(security),
+    async def get_current(cls, credentials: HTTPAuthorizationCredentials = Depends(security),
                     db: AsyncSession = Depends(get_db)):
         if not credentials or not credentials.scheme.lower() == "bearer":
             raise HTTPException(
@@ -65,7 +65,7 @@ class UserCRUD:
                 detail="Invalid token"
             )
 
-        if cls.get_if_exist(db, claims['email']):
+        if await cls.get_if_exist(db, claims['email']):
             return claims
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
