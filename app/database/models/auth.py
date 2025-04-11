@@ -15,8 +15,11 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(Text, nullable=False)
+    is_admin = Column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True,onupdate=datetime.utcnow)
 
     bank_accounts = relationship("BankAccount", back_populates="owner", cascade="all, delete, delete-orphan")
     transactions = relationship("BankTransaction", back_populates="user", cascade="all, delete, delete-orphan")
+
+
