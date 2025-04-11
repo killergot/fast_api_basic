@@ -1,4 +1,4 @@
-from .psql import get_db, create_db, engine
+from .psql import get_db, create_db, engine,Base
 from .models.auth import User
 from .models.transaction import BankTransaction
 from .models.bank_account import BankAccount

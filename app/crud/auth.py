@@ -43,6 +43,7 @@ class UserCRUD:
     @classmethod
     async def login(cls, db: AsyncSession, email: str, password: str):
         user = await cls.get_if_exist(db, email)
+        print(user.password, encode_data(password))
         if not user or user.password != encode_data(password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="email or password incorrect")
         token = get_jwt(user.id, email)
