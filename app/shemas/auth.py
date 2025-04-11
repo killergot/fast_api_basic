@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, Field
 
 MIN_LEN_PASS: int = 2
 
 class PasswordValidatorMixin(BaseModel):
-    password: str
+    password: str #Field(min_length=MIN_LEN_PASS)
 
     @field_validator('password')
     @staticmethod

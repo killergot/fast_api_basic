@@ -31,6 +31,10 @@ async def get_all_accounts(db: AsyncSession = Depends(get_db),
 async def get_account(account_id: int,
                       db: AsyncSession = Depends(get_db),
                       user = Depends(UserCRUD.get_current)):
+    # Костыль дурацкий, но что-то умного чот не приходит в голову
+    if account_id < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid account id")
     return await AccountCRUD.get_one(db, account_id, user['id'])
 
 @router.delete("/{account_id}", status_code=status.HTTP_200_OK,

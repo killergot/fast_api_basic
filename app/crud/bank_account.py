@@ -40,7 +40,11 @@ class AccountCRUD:
 
     @classmethod
     async def get_one(cls, db: AsyncSession, account_id: int, user_id: int) -> BankAccountOut:
-        db_account = await cls.get_if_exist(db, account_id,user_id)
+        try:
+            db_account = await cls.get_if_exist(db, account_id,user_id)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Wrong in account_id, check this (mb < 0 ?)")
         if not db_account:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Account not found")
