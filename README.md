@@ -7,3 +7,4 @@
   - JWT
 - fastAPI
 - environs
+- alembic
