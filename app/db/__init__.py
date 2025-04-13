@@ -1,5 +1,5 @@
 from .psql import engine,Base
-from .models.auth import User
+from .models.user import User
 from .models.transaction import BankTransaction
 from .models.bank_account import BankAccount
 from .triggers import *

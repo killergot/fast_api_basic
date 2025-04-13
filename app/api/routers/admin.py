@@ -6,8 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.admin import AdminCRUD
 from app.api.depencies.db import get_db
 
-from app.shemas.auth import UserOut, UserIn, UserLogin, UserSessionOut
-from app.services.auth import UserCRUD
+from app.shemas.auth import UserOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 

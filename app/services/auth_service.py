@@ -3,7 +3,6 @@ from fastapi.security import HTTPBearer
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.depencies.db import get_db
 from app.repositoryes.user_repository import UserRepository
 from app.utils.hash import encode_data
 from app.core.security import create_access_token
@@ -12,7 +11,6 @@ from app.shemas.auth import UserIn, UserOut, UserSessionOut, UserLogin
 
 class AuthService:
     def __init__(self, db: AsyncSession):
-        self.security = HTTPBearer()
         self.repo = UserRepository(db)
 
     async def register(self, user: UserIn):
