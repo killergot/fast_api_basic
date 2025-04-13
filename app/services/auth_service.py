@@ -24,7 +24,7 @@ class AuthService:
 
         new_user = await self.repo.create(user.full_name,
                                     user.email,
-                                    user.password,
+                                    encode_data(user.password),
                                     user.role)
 
         return UserOut.model_validate(new_user)

@@ -39,14 +39,14 @@ CREATE TRIGGER trigger_update_balance
 
 CREATE_ADMIN_USER = f"""
 INSERT INTO public.users(
-    full_name, email, password, is_admin, created_at, updated_at)
-    VALUES ('admin', '{config.credentials.admin_username}', '{config.credentials.admin_password}', TRUE,NOW(),NOW());
+    full_name, email, password, role, created_at)
+    VALUES ('admin', '{config.credentials.admin_username}', '{config.credentials.admin_password}', 1, NOW());
 """
 
 CREATE_TEST_USER=f"""
 INSERT INTO public.users(
-    full_name, email, password, is_admin, created_at, updated_at)
-    VALUES ('test', '{config.credentials.test_username}', '{config.credentials.test_password}', FALSE,NOW(),NOW());
+    full_name, email, password, role, created_at)
+    VALUES ('test', '{config.credentials.test_username}', '{config.credentials.test_password}', 0, NOW());
 """
 
 CREATE_ACCOUNT_TEST_USER="""
