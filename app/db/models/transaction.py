@@ -9,7 +9,7 @@ class BankTransaction(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ['account_id', 'user_id'],
-            ['bank_account.id', 'bank_account.user_id']
+            ['bank_account.account_id', 'bank_account.user_id']
         ),
     )
 

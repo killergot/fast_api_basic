@@ -5,10 +5,10 @@ from app.db.psql import Base
 class BankAccount(Base):
     __tablename__ = 'bank_account'
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'user_id'),
+        PrimaryKeyConstraint('account_id', 'user_id'),
     )
 
-    id: Mapped[int] = mapped_column(Integer)
+    account_id: Mapped[int] = mapped_column(Integer)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     balance: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 

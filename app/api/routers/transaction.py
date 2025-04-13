@@ -39,7 +39,7 @@ async def do_transaction(transaction: TransactionOtherIn,
             dependencies=[Depends(UserCRUD.get_current)])
 async def get_all_transactions(db: AsyncSession = Depends(get_db),
                                user = Depends(UserCRUD.get_current)):
-    return await TransactionCRUD.get_all(db,user['id'])
+    return await TransactionCRUD.get_WWWall(db,user['id'])
 
 @router.get("/{transaction_id}", status_code=status.HTTP_200_OK,
             dependencies=[Depends(UserCRUD.get_current)])

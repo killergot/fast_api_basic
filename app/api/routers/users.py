@@ -22,3 +22,8 @@ async def get_me(user = Depends(get_current_user)):
 async def get_user_by_id(user_id: int,
                          user_service = Depends(get_user_service)):
     return await user_service.get_user_by_id(user_id)
+
+@router.get("/get_all", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(require_role(ADMIN_ROLE))])
+async def get_all_users(user_service = Depends(get_user_service)):
+    return await user_service.get_all_users()

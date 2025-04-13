@@ -1,11 +1,12 @@
-"""Initial migration
+"""init
 
-Revision ID: 77088274c61c
+Revision ID: f7243a982fb8
 Revises: 
-Create Date: 2025-04-11 20:48:51.261918
+Create Date: 2025-04-13 16:52:49.921350
 
 """
 from typing import Sequence, Union
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -13,11 +14,28 @@ from app.core.config import load_config
 
 config = load_config()
 # revision identifiers, used by Alembic.
-revision: str = '77088274c61c'
+revision: str = 'f7243a982fb8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+CREATE_ADMIN_USER = f"""
+INSERT INTO public.users(
+    full_name, email, password, role, created_at)
+    VALUES ('admin', '{config.credentials.admin_username}', '{config.credentials.admin_password}', 1, NOW());
+"""
+
+CREATE_TEST_USER=f"""
+INSERT INTO public.users(
+    full_name, email, password, role, created_at)
+    VALUES ('test', '{config.credentials.test_username}', '{config.credentials.test_password}', 0, NOW());
+"""
+
+CREATE_ACCOUNT_TEST_USER="""
+INSERT INTO public.bank_account(
+	account_id, user_id, balance)
+	VALUES (1, 2, 0);
+"""
 ACCOUNT_BALANCE_TRIGGER = """
 CREATE OR REPLACE FUNCTION update_account_balance()
 RETURNS TRIGGER AS $$
@@ -37,24 +55,6 @@ CREATE TRIGGER trigger_update_balance
     EXECUTE FUNCTION update_account_balance();
 """
 
-CREATE_ADMIN_USER = f"""
-INSERT INTO public.users(
-    full_name, email, password, role, created_at)
-    VALUES ('admin', '{config.credentials.admin_username}', '{config.credentials.admin_password}', 1, NOW());
-"""
-
-CREATE_TEST_USER=f"""
-INSERT INTO public.users(
-    full_name, email, password, role, created_at)
-    VALUES ('test', '{config.credentials.test_username}', '{config.credentials.test_password}', 0, NOW());
-"""
-
-CREATE_ACCOUNT_TEST_USER="""
-INSERT INTO public.bank_account(
-	id, user_id, balance)
-	VALUES (1, 2, 0);
-"""
-
 
 def upgrade() -> None:
     """Upgrade schema."""
@@ -64,18 +64,18 @@ def upgrade() -> None:
     sa.Column('full_name', sa.String(length=255), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password', sa.Text(), nullable=False),
-    sa.Column('is_admin', sa.Boolean(), nullable=True),
+    sa.Column('role', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
     op.create_table('bank_account',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('account_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('balance', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id', 'user_id')
+    sa.PrimaryKeyConstraint('account_id', 'user_id')
     )
     op.create_table('bank_transaction',
     sa.Column('transaction_id', sa.UUID(), nullable=False),
@@ -83,11 +83,10 @@ def upgrade() -> None:
     sa.Column('account_id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('signature', sa.Text(), nullable=False),
-    sa.ForeignKeyConstraint(['account_id', 'user_id'], ['bank_account.id', 'bank_account.user_id'], ),
+    sa.ForeignKeyConstraint(['account_id', 'user_id'], ['bank_account.account_id', 'bank_account.user_id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('transaction_id')
     )
-
     op.execute(ACCOUNT_BALANCE_TRIGGER)
     op.execute(ACCOUNT_BALANCE_TRIGGER2)
     op.execute(CREATE_ADMIN_USER)

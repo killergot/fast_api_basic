@@ -9,7 +9,7 @@ from app.shemas.auth import UserOut
 
 security = HTTPBearer()
 
-async def get_current_user_payload(
+async def get_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> dict:
     token = credentials.credentials
@@ -21,7 +21,7 @@ async def get_current_user_payload(
     return payload
 
 async def get_current_user(
-    payload: dict = Depends(get_current_user_payload),
+    payload: dict = Depends(get_token_payload),
     service: UserService = Depends(get_user_service)
 ) -> UserOut:
     user: UserOut = await service.get_user_by_id(payload["id"])
@@ -32,7 +32,7 @@ async def get_current_user(
     return user
 
 def require_role(req_role: int):
-    async def role_checker(payload: dict = Depends(get_current_user_payload)):
+    async def role_checker(payload: dict = Depends(get_token_payload)):
         if not payload["role"] & req_role:
             raise HTTPException(status_code=403,
                                 detail="Not enough permissions")

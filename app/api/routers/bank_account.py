@@ -1,45 +1,55 @@
+from cmath import acosh
 from typing import List
 
 from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.bank_account import AccountCRUD
+from app.api.depencies.guard import get_current_user, require_role
+from app.api.depencies.services import get_bank_account_service
+from app.services.bank_account_service import BankAccountService
 from app.api.depencies.db import get_db
-from app.shemas.bank_account import BankAccountOut, BankAccountIn
+from app.services.role_service import ADMIN_ROLE
+from app.shemas.auth import UserOut
+from app.shemas.bank_account import BankAccountOut, BankAccountIn, BankAccountUserIn
 
-router = APIRouter(prefix="/account", tags=["account"])
+router = APIRouter(prefix="/bank_account", tags=["bank_account"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(UserCRUD.get_current)])
-async def create_account(account_id : BankAccountIn,db: AsyncSession = Depends(get_db),
-                         user = Depends(UserCRUD.get_current)):
-    return await AccountCRUD.create(db, account_id.id, user['id'])
+             response_model=BankAccountOut)
+async def create_account(account: BankAccountIn,
+                         user:UserOut =  Depends(get_current_user),
+                         service:BankAccountService =  Depends(get_bank_account_service)):
+    account = BankAccountUserIn(account_id = account.account_id, user_id= user.id)
+    return await service.create_account(account)
 
 
-@router.get("/all", status_code=status.HTTP_200_OK,
-            dependencies=[Depends(UserCRUD.get_current)],
-            response_model=List[BankAccountOut])
-async def get_all_accounts(db: AsyncSession = Depends(get_db),
-                           user = Depends(UserCRUD.get_current)):
-    return await AccountCRUD.get_all(db, user['id'])
+@router.get("/all", status_code=status.HTTP_201_CREATED)
+async def create_account(user:UserOut =  Depends(get_current_user),
+                         service:BankAccountService =  Depends(get_bank_account_service)):
+    return await service.get_all_by_user(user.id)
 
-@router.get("/{account_id}", status_code=status.HTTP_200_OK,
-            dependencies=[Depends(UserCRUD.get_current)],
-            response_model=BankAccountOut)
-async def get_account(account_id: int,
-                      db: AsyncSession = Depends(get_db),
-                      user = Depends(UserCRUD.get_current)):
-    # Костыль дурацкий, но что-то умного чот не приходит в голову
-    if account_id < 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Invalid account id")
-    return await AccountCRUD.get_one(db, account_id, user['id'])
+@router.get("/all_by_user", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(require_role(ADMIN_ROLE))])
+async def create_account(user_id: int,
+                         service:BankAccountService =  Depends(get_bank_account_service)):
+    return await service.get_all_by_user(user_id)
 
-@router.delete("/{account_id}", status_code=status.HTTP_200_OK,
-               dependencies=[Depends(UserCRUD.get_current)])
-async def try_delete_account(account_id: int):
-    return {'msg': 'You can not delete your bank account:)'}
+@router.get("/{account_id}", status_code=status.HTTP_200_OK)
+async def create_account(account_id: int,
+                         user:UserOut =  Depends(get_current_user),
+                         service:BankAccountService =  Depends(get_bank_account_service)):
+    account = BankAccountUserIn.model_validate({'account': account_id, 'user': user.id})
+
+    return await service.get_account(account)
+
+@router.delete("/{account_id}", status_code=status.HTTP_200_OK)
+async def create_account(account_id: int,
+                         user:UserOut =  Depends(get_current_user),
+                         service:BankAccountService =  Depends(get_bank_account_service)):
+    account = BankAccountUserIn.model_validate({'account': account_id, 'user': user.id})
+
+    return await service.delete_account(account)
 
 
 
