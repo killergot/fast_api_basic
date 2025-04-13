@@ -1,15 +1,12 @@
 from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.models.user import User
+from app.repositoryes.template import TemplateRepository
 
 
-class UserRepository:
-    def __init__(self, db: AsyncSession):
-        self.db = db
-
+class UserRepository(TemplateRepository):
     async def get_all(self):
         data = select(User)
         users = await self.db.execute(data)

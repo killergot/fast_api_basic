@@ -2,7 +2,7 @@ from uuid import UUID
 from pydantic import BaseModel, field_validator, ConfigDict
 
 
-class TransactionIn(BaseModel):
+class TransactionBase(BaseModel):
     account_id: int
     amount: int
 
@@ -20,15 +20,17 @@ class TransactionIn(BaseModel):
             raise Exception('account_id must be greater than 0')
         return value
 
-
-
-class TransactionOtherIn(TransactionIn):
+class TransactionIn(TransactionBase):
     transaction_id: UUID
+
+class TransactionWebhookIn(TransactionIn):
     signature: str
     user_id: int
 
+class TransactionCreateIn(TransactionWebhookIn):
+    pass
+
 class TransactionOut(TransactionIn):
-    transaction_id: UUID
     user_id: int
 
     model_config = ConfigDict(from_attributes=True)

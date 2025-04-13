@@ -42,7 +42,7 @@ RETURNS TRIGGER AS $$
 BEGIN
     UPDATE bank_account
     SET balance = balance + NEW.amount
-    WHERE id = NEW.account_id;
+    WHERE account_id = NEW.account_id and user_id == NEW.user_id;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

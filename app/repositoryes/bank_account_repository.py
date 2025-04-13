@@ -1,14 +1,12 @@
 from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db import BankAccount
+from app.repositoryes.template import TemplateRepository
 
 
-class BankAccountRepository:
-    def __init__(self, db: AsyncSession):
-        self.db = db
+class BankAccountRepository(TemplateRepository):
 
     async def get_all(self):
         data = select(BankAccount)

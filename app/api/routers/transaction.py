@@ -4,57 +4,48 @@ from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.transaction import TransactionCRUD
-from app.api.depencies.db import get_db
-from app.services.auth import UserCRUD
-from app.shemas.transaction import TransactionIn, TransactionOtherIn, TransactionOut
+from app.api.depencies.guard import get_current_user, require_role
+from app.api.depencies.services import get_bank_transaction_service
+from app.db.models.user import User
+from app.services.role_service import ADMIN_ROLE
+from app.services.transaction_service import TransactionService
+from app.shemas.transaction import TransactionIn, TransactionOut, TransactionWebhookIn
 
 router = APIRouter(prefix="/transaction", tags=["transaction"])
 
-@router.post("/me", status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(UserCRUD.get_current)])
-async def do_transaction(transaction: TransactionIn,
-                         db: AsyncSession = Depends(get_db),
-                         user = Depends(UserCRUD.get_current)):
-    return await TransactionCRUD.create(db,
-                                  user['id'],
-                                  transaction.account_id,
-                                  transaction.amount)
-
-@router.post("/other", status_code=status.HTTP_201_CREATED,
+@router.post("/", status_code=status.HTTP_201_CREATED,
              response_model=TransactionOut)
-async def do_transaction(transaction: TransactionOtherIn,
-                         db: AsyncSession = Depends(get_db)):
-    '''В общем я не знаю как надо было сделать уникальные транзакции:
-    Для каждого или для всех. Я сделал так, что для всех пользователей
-    uuid транзакции повторяться не может'''
-    return await TransactionCRUD.create_from(db,
-                                  transaction.user_id,
-                                  transaction.account_id,
-                                  transaction.amount,
-                                  transaction.transaction_id,
-                                  transaction.signature)
+async def do_transaction(transaction: TransactionIn,
+                         service: TransactionService = Depends(get_bank_transaction_service),
+                         user: User = Depends(get_current_user)):
+    return await service.create_from_user(transaction, user.id)
 
-@router.get("/all", status_code=status.HTTP_200_OK,
-            dependencies=[Depends(UserCRUD.get_current)])
-async def get_all_transactions(db: AsyncSession = Depends(get_db),
-                               user = Depends(UserCRUD.get_current)):
-    return await TransactionCRUD.get_WWWall(db,user['id'])
+@router.post("/webhook", status_code=status.HTTP_201_CREATED,
+             response_model=TransactionOut)
+async def do_transaction(transaction: TransactionWebhookIn,
+                         service: TransactionService = Depends(get_bank_transaction_service)):
+    return await service.check_webhook(transaction)
 
-@router.get("/{transaction_id}", status_code=status.HTTP_200_OK,
-            dependencies=[Depends(UserCRUD.get_current)])
+@router.get("/all/{user_id}", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(require_role(ADMIN_ROLE))])
+async def get_all_transactions(user_id : int,
+                               service: TransactionService = Depends(get_bank_transaction_service)):
+    return await service.get_all_by_user(user_id)
+
+@router.get("/all", status_code=status.HTTP_200_OK)
+async def get_all_transactions(user: User = Depends(get_current_user),
+                               service: TransactionService = Depends(get_bank_transaction_service)):
+    return await service.get_all_by_user(user.id)
+
+
+@router.get("/{transaction_id}", status_code=status.HTTP_200_OK)
 async def get_transaction(transaction_id: UUID,
-                          db: AsyncSession = Depends(get_db),
-                          user = Depends(UserCRUD.get_current)):
-    temp = await TransactionCRUD.get_if_exist(db, transaction_id, user['id'])
-    if temp is None or temp.user_id != user['id']:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Transaction not found")
-    else:
-        return TransactionOut.model_validate(temp)
+                          user = Depends(get_current_user),
+                          service: TransactionService = Depends(get_bank_transaction_service)):
+    return await service.get_from_user(transaction_id,user.id)
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_200_OK,
-               dependencies=[Depends(UserCRUD.get_current)])
+               dependencies=[Depends(require_role(ADMIN_ROLE))])
 async def try_delete_transaction(transaction_id: UUID):
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,

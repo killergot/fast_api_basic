@@ -1,14 +1,9 @@
-from cmath import acosh
-from typing import List
-
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status
 from fastapi.routing import APIRouter
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.depencies.guard import get_current_user, require_role
 from app.api.depencies.services import get_bank_account_service
 from app.services.bank_account_service import BankAccountService
-from app.api.depencies.db import get_db
 from app.services.role_service import ADMIN_ROLE
 from app.shemas.auth import UserOut
 from app.shemas.bank_account import BankAccountOut, BankAccountIn, BankAccountUserIn
