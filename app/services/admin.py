@@ -4,11 +4,11 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.database.models.auth import User
-from app.database.models.bank_account import BankAccount
-from app.services.jwt import get_jwt, verify_jwt
-from app.crud.auth import UserCRUD
+from app.api.depencies.db import get_db
+from app.db.models.auth import User
+from app.db.models.bank_account import BankAccount
+from app.utils.jwt import get_jwt, verify_jwt
+from app.services.auth import UserCRUD
 
 class AdminCRUD:
     security = HTTPBearer()

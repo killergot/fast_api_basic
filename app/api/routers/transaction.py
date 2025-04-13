@@ -4,9 +4,9 @@ from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.transaction import TransactionCRUD
-from app.database import get_db, create_db
-from app.crud.auth import UserCRUD
+from app.services.transaction import TransactionCRUD
+from app.api.depencies.db import get_db
+from app.services.auth import UserCRUD
 from app.shemas.transaction import TransactionIn, TransactionOtherIn, TransactionOut
 
 router = APIRouter(prefix="/transaction", tags=["transaction"])

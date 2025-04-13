@@ -9,7 +9,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from app.config.config import load_config
+from app.core.config import load_config
 
 config = load_config()
 # revision identifiers, used by Alembic.

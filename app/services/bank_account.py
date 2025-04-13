@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException,status
 
 
-from app.database.models.bank_account import BankAccount
+from app.db.models.bank_account import BankAccount
 from app.shemas.bank_account import BankAccountOut
 
 

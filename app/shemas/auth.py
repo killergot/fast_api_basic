@@ -18,6 +18,7 @@ class PasswordValidatorMixin(BaseModel):
 class UserBase(BaseModel):
     full_name: str
     email: EmailStr
+    role: int = 0
 
 class UserIn(UserBase,PasswordValidatorMixin):
     pass

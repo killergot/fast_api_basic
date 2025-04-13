@@ -10,9 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.config.config import load_config
-from app.database.models.transaction import BankTransaction
-from app.crud.bank_account import AccountCRUD
-from app.services.hash import encode_data
+from app.db.models.transaction import BankTransaction
+from app.services.bank_account import AccountCRUD
+from app.utils.hash import encode_data
 from app.shemas.transaction import TransactionOut
 
 SECRET_KEY = load_config().secret_keys.secret_key_signature

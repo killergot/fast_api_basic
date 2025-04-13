@@ -1,6 +1,6 @@
 from sqlalchemy import DDL, event
 
-from app.database.models.transaction import BankTransaction
+from app.db.models.transaction import BankTransaction
 
 
 

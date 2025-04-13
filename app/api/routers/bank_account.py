@@ -4,9 +4,8 @@ from fastapi import Depends, status, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.bank_account import AccountCRUD
-from app.database import get_db
-from app.crud.auth import UserCRUD
+from app.services.bank_account import AccountCRUD
+from app.api.depencies.db import get_db
 from app.shemas.bank_account import BankAccountOut, BankAccountIn
 
 router = APIRouter(prefix="/account", tags=["account"])

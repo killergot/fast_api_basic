@@ -3,7 +3,7 @@ import random
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Text, TIMESTAMP, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.database.psql import Base, engine
+from app.db.psql import Base, engine
 import uuid
 from datetime import datetime
 
@@ -15,7 +15,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(Text, nullable=False)
-    is_admin = Column(Boolean, default=False)
+    role = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True,onupdate=datetime.utcnow)
 

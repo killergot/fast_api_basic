@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey,ForeignKeyConstraint, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.database.psql import Base
+from app.db.psql import Base
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 

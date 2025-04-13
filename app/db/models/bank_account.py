@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, ForeignKey, PrimaryKeyConstraint
-from app.database.psql import Base
+from app.db.psql import Base
 
 class BankAccount(Base):
     __tablename__ = 'bank_account'
