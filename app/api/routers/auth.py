@@ -13,7 +13,8 @@ from app.services import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED
+@router.post("/signup", response_model=UserOut,
+             status_code=status.HTTP_201_CREATED
              ,dependencies=[Depends(require_role(ADMIN_ROLE))])
 async def create_user(user: UserIn, service: AuthService = Depends(get_auth_service)):
     return await service.register(user)

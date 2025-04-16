@@ -43,7 +43,6 @@ async def create_account(account_id: int,
                          user:UserOut =  Depends(get_current_user),
                          service:BankAccountService =  Depends(get_bank_account_service)):
     account = BankAccountUserIn.model_validate({'account': account_id, 'user': user.id})
-
     return await service.delete_account(account)
 
 

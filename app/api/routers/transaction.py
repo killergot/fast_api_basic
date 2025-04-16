@@ -44,13 +44,15 @@ async def get_transaction(transaction_id: UUID,
                           service: TransactionService = Depends(get_bank_transaction_service)):
     return await service.get_from_user(transaction_id,user.id)
 
-@router.delete("/{transaction_id}", status_code=status.HTTP_200_OK,
+@router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(require_role(ADMIN_ROLE))])
-async def try_delete_transaction(transaction_id: UUID):
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Deleting transactions is not allowed by system policy"
-    )
+async def try_delete_transaction(transaction_id: UUID,
+                                 service: TransactionService = Depends(get_bank_transaction_service)):
+    if not service.delete(transaction_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Deleting transactions is not allowed by system policy"
+        )
 
 
 

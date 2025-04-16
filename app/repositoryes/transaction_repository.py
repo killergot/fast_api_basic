@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from app.repositoryes.template import TemplateRepository
 from app.db import BankTransaction
+from app.core.except_handler import except_handler
 
 
 class TransactionRepository(TemplateRepository):
@@ -40,10 +41,7 @@ class TransactionRepository(TemplateRepository):
 
         return new_transaction
 
+    @except_handler
     async def delete(self, transaction_id: UUID) -> bool:
-        try:
-            await self.db.delete(await self.db.get(BankTransaction, transaction_id))
-            return True
-        except Exception as e:
-            print(e)
-            return False
+        await self.db.delete(await self.db.get(BankTransaction, transaction_id))
+        return True

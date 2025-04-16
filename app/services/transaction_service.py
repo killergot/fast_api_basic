@@ -21,6 +21,7 @@ from app.utils.signature import get_signature
 class TransactionService:
     def __init__(self, db: AsyncSession):
         self.repo = TransactionRepository(db)
+
     async def _get(self, transaction_id: UUID) -> BankTransaction:
         transaction = await self.repo.get_by_id(transaction_id)
         if transaction is None:
@@ -80,5 +81,8 @@ class TransactionService:
     async def get_all_by_user(self, user_id: int):
         data = await self.repo.get_all_by_user(user_id)
         return data
+
+    async def delete(self, transaction_id: UUID):
+        return await self.repo.delete(transaction_id)
 
 
