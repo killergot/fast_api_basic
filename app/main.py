@@ -9,7 +9,16 @@ from app.core.logger import init_log
 
 
 init_log(logging.DEBUG)
-app = FastAPI()
+app = FastAPI(
+    title="Basic API",
+    description="API with auth, bank accounts operation"
+                " and emulate transaction with signature",
+    version="1.0.0",
+    contact={
+        "name": "Rubick",
+        "email": "m.rubick@icloud.com",
+    }
+)
 app.include_router(api_router)
 get_cors_middleware(app)
 
