@@ -1,24 +1,11 @@
 from uuid import UUID
-from pydantic import BaseModel, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class TransactionBase(BaseModel):
-    account_id: int
-    amount: int
-
-    @field_validator('amount')
-    @staticmethod
-    def GT0(value):
-        if value <= 0:
-           raise Exception('amount must be greater than 0')
-        return value
-
-    @field_validator('account_id')
-    @staticmethod
-    def GT0(value):
-        if value <= 0:
-            raise Exception('account_id must be greater than 0')
-        return value
+    account_id: int = Field(gt=0)
+    # Я посчитал, что 0 и отрицательные тразнакции у нас быть не могут)
+    amount: int = Field(gt=0)
 
 class TransactionIn(TransactionBase):
     transaction_id: UUID

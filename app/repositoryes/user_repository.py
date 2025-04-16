@@ -1,10 +1,13 @@
 from typing import Optional
+import logging
 
 from sqlalchemy import select
 
 from app.db.models.user import User
 from app.repositoryes.template import TemplateRepository
+from app.core.except_handler import except_handler
 
+log = logging.getLogger(__name__)
 
 class UserRepository(TemplateRepository):
     async def get_all(self):
@@ -34,10 +37,15 @@ class UserRepository(TemplateRepository):
 
         return new_user
 
+    async def update(self, user_id: int, full_name: str,password: str):
+        user = await self.db.get(User, user_id)
+        user.full_name = full_name
+        user.password = password
+        await self.db.commit()
+        await self.db.refresh(user)
+
+    @except_handler
     async def delete(self, user_id: int) -> bool:
-        try:
-            await self.db.delete(await self.db.get(User, user_id))
-            return True
-        except Exception as e:
-            print(e)
-            return False
+        await self.db.delete(await self.db.get(User, user_id))
+        await self.db.commit()
+        return True

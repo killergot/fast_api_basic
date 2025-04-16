@@ -1,19 +1,11 @@
-from pydantic import BaseModel,ConfigDict, field_validator
+from pydantic import BaseModel,ConfigDict, Field
 from fastapi import HTTPException,status
 
 class BankAccountIn(BaseModel):
-    account_id: int
-
-    @field_validator('account_id')
-    @staticmethod
-    def GT0(value):
-        if value <= 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail='account id must be greater than 0')
-        return value
+    account_id: int = Field(gt=0)
 
 class BankAccountUserIn(BankAccountIn):
-    user_id: int
+    user_id: int = Field(gt=0)
 
 
 class BankAccountOut(BankAccountUserIn):

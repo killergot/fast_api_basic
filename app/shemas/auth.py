@@ -5,14 +5,7 @@ from pydantic import BaseModel, EmailStr, field_validator, Field
 MIN_LEN_PASS: int = 2
 
 class PasswordValidatorMixin(BaseModel):
-    password: str #Field(min_length=MIN_LEN_PASS)
-
-    @field_validator('password')
-    @staticmethod
-    def check_password(value):
-        if len(value) < MIN_LEN_PASS:
-            raise ValueError(f'Password must be at least {MIN_LEN_PASS} characters')
-        return value
+    password: str = Field(min_length=MIN_LEN_PASS)
 
 
 class UserBase(BaseModel):
