@@ -1,4 +1,5 @@
 from hashlib import sha256
 
-def encode_data(data: str) -> str:
+def get_hash(data: any) -> str:
+    data = str(data)
     return sha256(data.encode()).hexdigest()

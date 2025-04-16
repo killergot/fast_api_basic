@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.api.depencies.services import get_user_service
 from app.core.security import decode_access_token
 from app.services.user_service import UserService
-from app.shemas.auth import UserOut
+from app.shemas.user import UserOut
 
 security = HTTPBearer()
 

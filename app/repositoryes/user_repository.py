@@ -43,6 +43,7 @@ class UserRepository(TemplateRepository):
         user.password = password
         await self.db.commit()
         await self.db.refresh(user)
+        return user
 
     @except_handler
     async def delete(self, user_id: int) -> bool:

@@ -3,15 +3,18 @@ from fastapi.routing import APIRouter
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.depencies.guard import require_role
 from app.api.depencies.services import get_auth_service
 from app.api.depencies.db import get_db
+from app.services.role_service import ADMIN_ROLE
 
-from app.shemas.auth import UserOut, UserIn, UserLogin, UserSessionOut
+from app.shemas.user import UserOut, UserIn, UserLogin, UserSessionOut
 from app.services import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED
+             ,dependencies=[Depends(require_role(ADMIN_ROLE))])
 async def create_user(user: UserIn, service: AuthService = Depends(get_auth_service)):
     return await service.register(user)
 

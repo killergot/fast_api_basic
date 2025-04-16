@@ -4,9 +4,9 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositoryes.user_repository import UserRepository
-from app.utils.hash import encode_data
+from app.utils.hash import get_hash
 from app.core.security import create_access_token
-from app.shemas.auth import UserIn, UserOut, UserSessionOut, UserLogin
+from app.shemas.user import UserIn, UserOut, UserSessionOut, UserLogin
 
 
 class AuthService:
@@ -21,9 +21,9 @@ class AuthService:
         # Точнее вообще никакой инфы, всегда отвечать ok True, чтоб нельзя было перебрать базу пользователей
 
         new_user = await self.repo.create(user.full_name,
-                                    user.email,
-                                    encode_data(user.password),
-                                    user.role)
+                                          user.email,
+                                          get_hash(user.password),
+                                          user.role)
 
         return UserOut.model_validate(new_user)
     # В данном случае для ТЗ достаточно просто выдавать jwt
@@ -32,7 +32,7 @@ class AuthService:
     async def login(self, test_user: UserLogin):
         user = await self.repo.get_by_email(test_user.email)
 
-        if not user or user.password != encode_data(test_user.password):
+        if not user or user.password != get_hash(test_user.password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="email or password incorrect")
 

@@ -3,7 +3,8 @@ from fastapi import  HTTPException, status
 from app.repositoryes.user_repository import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.shemas.auth import UserOut
+from app.shemas.user import UserOut, UserUpdateIn
+from app.utils.hash import get_hash
 
 
 class UserService:
@@ -34,7 +35,14 @@ class UserService:
         return result
 
     async def del_user_by_id(self, id: int):
-        user = await self._get_user(id)
+        _ = await self._get_user(id)
         if not await self.repo.delete(id):
             raise HTTPException(status_code=status.HTTP_500_NOT_FOUND,
                                 detail="Error deleting user")
+
+    async def update_user(self, user: UserUpdateIn):
+        temp = await self._get_user(user.id)
+        new_password = user.password if user.password else temp.password
+        new_full_name = get_hash(user.full_name) if user.full_name else temp.full_name
+        user = await self.repo.update(user.id, new_full_name, new_password)
+        return UserOut.model_validate(user)

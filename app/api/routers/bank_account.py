@@ -5,7 +5,7 @@ from app.api.depencies.guard import get_current_user, require_role
 from app.api.depencies.services import get_bank_account_service
 from app.services.bank_account_service import BankAccountService
 from app.services.role_service import ADMIN_ROLE
-from app.shemas.auth import UserOut
+from app.shemas.user import UserOut
 from app.shemas.bank_account import BankAccountOut, BankAccountIn, BankAccountUserIn
 
 router = APIRouter(prefix="/bank_account", tags=["bank_account"])
